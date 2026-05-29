@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://dxi48d13lw6em"]
+
+[ext_resource type="Script" uid="uid://d14ypitw7sbo" path="res://addons/pgtk_tooltips/BasicTooltipUI.gd" id="1_hihr8"]
+[ext_resource type="Script" uid="uid://b4ifbylkpomls" path="res://addons/pgtk_tooltips/NestedTooltipRichTextLabel.gd" id="2_jybys"]
+
+[node name="BasicTooltipUI" type="Control" unique_id=1135469574 node_paths=PackedStringArray("backdrop", "container", "tooltip_name", "tooltip_description")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hihr8")
+backdrop = NodePath("ColorRect")
+container = NodePath("PanelContainer")
+tooltip_name = NodePath("PanelContainer/MarginContainer/VBoxContainer/Label")
+tooltip_description = NodePath("PanelContainer/MarginContainer/VBoxContainer/RichTextLabel")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1322423206]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0627451, 0.09411765, 0.1254902, 0.34901962)
+
+[node name="PanelContainer" type="PanelContainer" parent="." unique_id=730920474]
+custom_minimum_size = Vector2(360, 0)
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer" unique_id=89380457]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer/MarginContainer" unique_id=2036134851]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=860670150]
+layout_mode = 2
+text = "Testing"
+
+[node name="RichTextLabel" type="RichTextLabel" parent="PanelContainer/MarginContainer/VBoxContainer" unique_id=827331631]
+layout_mode = 2
+bbcode_enabled = true
+text = "gffg"
+fit_content = true
+meta_underlined = false
+script = ExtResource("2_jybys")

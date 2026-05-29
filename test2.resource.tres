@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="TestResource" format=3 uid="uid://b5brj2bmqh5e0"]
+
+[ext_resource type="Script" uid="uid://da67m8vkepjwy" path="res://TestResource.gd" id="1_yctvk"]
+
+[resource]
+script = ExtResource("1_yctvk")
+desc = "123 [url=res://test.resource.tres]ABC[/url]"
+metadata/_custom_type_script = "uid://da67m8vkepjwy"

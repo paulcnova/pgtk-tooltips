@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://byyxc3xne2vf0"]
+
+[ext_resource type="Script" uid="uid://co40rp4bkhot6" path="res://TestResource.gd" id="1_8uh7m"]
+[ext_resource type="Script" uid="uid://dhm712s3hd16c" path="res://addons/pgtk_tooltips/TooltipNode.gd" id="1_37kl0"]
+
+[sub_resource type="Resource" id="Resource_6uqi0"]
+script = ExtResource("1_8uh7m")
+name = "qbudabi"
+desc = "gffda  fsfsfs sfd"
+
+[sub_resource type="Resource" id="Resource_8uh7m"]
+script = ExtResource("1_8uh7m")
+name = "uwu"
+desc = "Hello [url=res://test.resource.tres]World![/url]"
+
+[node name="Control" type="Control" unique_id=1751925491]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Button" type="Button" parent="." unique_id=2058939480]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+text = "ABADSDF"
+metadata/tooltip_data = SubResource("Resource_6uqi0")
+
+[node name="TooltipNode" type="Node" parent="Button" unique_id=131363972]
+script = ExtResource("1_37kl0")
+
+[node name="Button2" type="Button" parent="." unique_id=1640583938]
+layout_mode = 0
+offset_left = 125.0
+offset_top = 215.0
+offset_right = 206.0
+offset_bottom = 246.0
+text = "ABADSDF"
+
+[node name="Button3" type="Button" parent="." unique_id=1169144613]
+layout_mode = 0
+offset_left = 319.0
+offset_top = 89.0
+offset_right = 400.0
+offset_bottom = 120.0
+text = "ABADSDF"
+
+[node name="TooltipNode" type="Node" parent="Button3" unique_id=98451630]
+script = ExtResource("1_37kl0")
+tooltip_data = SubResource("Resource_8uh7m")
