@@ -7,6 +7,8 @@ extends Node
 const META_TOOLTIP_DATA: String = "tooltip_data";
 const PROPERTY_TOOLTIP_OFFSET: String = "tooltip_offset";
 const PROPERTY_TOOLTIP_CATEGORY: String = "tooltip_category";
+const PROPERTY_TOOLTIP_RECOMMENDED_WIDTH: String = "recommended_tooltip_width";
+const PROPERTY_TOOLTIP_RECOMMENDED_HEIGHT: String = "recommended_tooltip_height";
 const NODE_NAME_TOOLTIP: String = "Tooltip";
 const NODE_NAME_KILL_TIMER: String = "Kill Timer";
 const SETTINGS_NAME_TOOLTIP_RES_PATH: String = "gui/tooltips/tooltip_res_path";
@@ -23,9 +25,11 @@ var _delay_timer: Timer;
 var _is_hovering: bool = false;
 var _is_nested: bool = false;
 
+## Returns `true` if there is an associated [class TooltipUI] that exists.
 var has_ui: bool:
 	get: return self._tooltip != null;
 
+## Returns `true` if the current [class TooltipUI] is being inspected.
 var is_inspecting: bool:
 	get: return self._tooltip != null and self._tooltip.is_inspecting;
 
@@ -50,6 +54,13 @@ var is_inspecting: bool:
 ## This variable is here in case it's not guaranteed to have a metadata.
 ## This will be checked first, as it can be set in-editor easily.
 @export var tooltip_data: Resource;
+
+## The path to the resource. For best practice, have the parent node hold
+## the tooltip's data in a metadata named `tooltip_data`; this is so that
+## the parent and any other object can manipulate the data much easier.
+## This variable is here in case it's not guaranteed to have a metadata.
+## This will be checked second, as it can be set in-editor easily.
+## This variable is also here to make it easier for nested tooltips to find their content.
 @export var tooltip_data_path: String;
 
 #endregion Properties
@@ -71,6 +82,7 @@ func _ready() -> void:
 
 #region Public Methods
 
+## Shows the tooltip (UI) to the player.
 func show_tooltip() -> void:
 	if self._tooltip == null:
 		return;
@@ -79,12 +91,14 @@ func show_tooltip() -> void:
 	self._delay_timer.stop();
 	self._tooltip.show_tooltip();
 
+## Hides the tooltip (UI) from the player.
 func hide_tooltip() -> void:
 	if self._tooltip == null:
 		return;
 	self._delay_timer.stop();
 	self._tooltip.hide();
 
+## Gets the underlying data to be displayed.
 func get_data() -> Resource:
 	if self.tooltip_data != null: return self.tooltip_data;
 	if self.tooltip_data_path != null and self.tooltip_data_path != "":
@@ -99,6 +113,9 @@ func get_data() -> Resource:
 		return null;
 	return parent.get_meta(META_TOOLTIP_DATA);
 
+## Instantiates the tooltip to be used by this node.
+## While this is mostly used for internal purposes, it is exposed in case
+## a pre-emptive instantiation is needed.
 func instantiate_tooltip() -> void:
 	var tooltip_path := self._get_tooltip_node_path();
 	
@@ -133,6 +150,8 @@ func instantiate_tooltip() -> void:
 	tooltip.associated_node = self;
 	tooltip.top_level = true;
 	tooltip.name = self._get_tooltip_node_path();
+	tooltip.container.custom_minimum_size = self._get_minimum_size(data, tooltip.container.custom_minimum_size);
+	tooltip.container.reset_size();
 	
 	var kill_timer := Timer.new();
 	
@@ -153,6 +172,15 @@ func instantiate_tooltip() -> void:
 #region Private Methods
 
 func _get_tooltip_node_path() -> String: return "%s-%d" % [NODE_NAME_TOOLTIP, self.get_instance_id()];
+
+func _get_minimum_size(data: Resource, default: Vector2) -> Vector2:
+	var width: int = self._extract(data, PROPERTY_TOOLTIP_RECOMMENDED_WIDTH, -1);
+	var height: int = self._extract(data, PROPERTY_TOOLTIP_RECOMMENDED_HEIGHT, -1);
+	
+	return Vector2(
+		width if width > 0 else default.x,
+		height if height > 0 else default.y
+	);
 
 func _hook_to_signal() -> bool:
 	var parent := self.get_parent();
