@@ -15,6 +15,10 @@ run/main_scene="uid://byyxc3xne2vf0"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+TooltipLayer="*uid://bqh1xtlsnd73t"
+
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/pgtk_tooltips/plugin.cfg")
@@ -23,6 +27,8 @@ enabled=PackedStringArray("res://addons/pgtk_tooltips/plugin.cfg")
 
 tooltips/tooltip_res_path="res://interface/tooltips"
 tooltips/tooltip_suffix=".tooltip.tscn"
+tooltips/tooltip_layer=10
+tooltips/tooltip_backdrop_color=Color(0.0627451, 0.09411765, 0.1254902, 0.4392157)
 
 [input]
 

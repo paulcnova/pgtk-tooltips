@@ -49,4 +49,5 @@ text = "ABADSDF"
 
 [node name="TooltipNode" type="Node" parent="Button3" unique_id=98451630]
 script = ExtResource("1_37kl0")
+delay_duration = 0.2
 tooltip_data = SubResource("Resource_8uh7m")

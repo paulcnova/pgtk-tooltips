@@ -32,19 +32,23 @@ func _on_link_hover_started(meta: Variant) -> void:
 		tooltip_node.hook_signals_on_ready = false;
 		tooltip_node.tooltip_data_path = meta;
 		tooltip_node.name = id;
+		tooltip_node._is_nested = true;
 		self.add_child(tooltip_node, true);
 	
 	var tooltip := self.get_node(id) as TooltipNode;
 	
 	if not tooltip.has_ui: tooltip.instantiate_tooltip();
-	tooltip.show_tooltip();
+	if not tooltip.is_inspecting:
+		tooltip.show_tooltip();
 
 func _on_link_hover_ended(meta: Variant) -> void:
 	var id: String = self._identify(meta);
 	
 	if self.has_node(id):
 		var tooltip := self.get_node(id) as TooltipNode;
-		tooltip.hide_tooltip();
+		
+		if not tooltip.is_inspecting:
+			tooltip.hide_tooltip();
 
 func _identify(meta: Variant) -> String:
 	var text := str(meta);

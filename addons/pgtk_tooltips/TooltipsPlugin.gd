@@ -9,9 +9,11 @@ func _enable_plugin() -> void:
 		ProjectSettings.set_setting(TooltipNode.SETTINGS_NAME_TOOLTIP_RES_PATH, TooltipNode.SETTINGS_VALUE_TOOLTIP_RES_PATH);
 	if not ProjectSettings.has_setting(TooltipNode.SETTINGS_NAME_TOOLTIP_SUFFIX):
 		ProjectSettings.set_setting(TooltipNode.SETTINGS_NAME_TOOLTIP_SUFFIX, TooltipNode.SETTINGS_VALUE_TOOLTIP_SUFFIX);
-	print("INPUT");
-	print("INSPECT", InputMap.has_action(TooltipUI.INPUT_ACTION_TOOLTIP_INSPECT));
-	print("EXIT", InputMap.has_action(TooltipUI.INPUT_ACTION_TOOLTIP_EXIT));
+	if not ProjectSettings.has_setting(TooltipNode.SETTINGS_NAME_TOOLTIP_LAYER):
+		ProjectSettings.set_setting(TooltipNode.SETTINGS_NAME_TOOLTIP_LAYER, TooltipNode.SETTINGS_VALUE_TOOLTIP_LAYER);
+	if not ProjectSettings.has_setting(TooltipNode.SETTINGS_NAME_TOOLTIP_BACKDROP_COLOR):
+		ProjectSettings.set_setting(TooltipNode.SETTINGS_NAME_TOOLTIP_BACKDROP_COLOR, TooltipNode.SETTINGS_VALUE_TOOLTIP_BACKDROP_COLOR);
+	
 	if not InputMap.has_action(TooltipUI.INPUT_ACTION_TOOLTIP_INSPECT):
 		var ev := InputEventKey.new();
 		
@@ -30,5 +32,11 @@ func _enable_plugin() -> void:
 			"events": [ev]
 		});
 	ProjectSettings.save();
+
+func _enter_tree() -> void:
+	self.add_autoload_singleton("TooltipLayer", "res://addons/pgtk_tooltips/TooltipLayer.gd");
+
+func _exit_tree() -> void:
+	self.remove_autoload_singleton("TooltipLayer");
 
 #endregion Godot Methods

@@ -13,13 +13,21 @@ const SETTINGS_NAME_TOOLTIP_RES_PATH: String = "gui/tooltips/tooltip_res_path";
 const SETTINGS_VALUE_TOOLTIP_RES_PATH: String = "res://interface/tooltips";
 const SETTINGS_NAME_TOOLTIP_SUFFIX: String = "gui/tooltips/tooltip_suffix";
 const SETTINGS_VALUE_TOOLTIP_SUFFIX: String = ".tooltip.tscn";
+const SETTINGS_NAME_TOOLTIP_LAYER: String = "gui/tooltips/tooltip_layer";
+const SETTINGS_VALUE_TOOLTIP_LAYER: int = 10;
+const SETTINGS_NAME_TOOLTIP_BACKDROP_COLOR: String = "gui/tooltips/tooltip_backdrop_color";
+const SETTINGS_VALUE_TOOLTIP_BACKDROP_COLOR: Color = Color8(16, 24, 32, 112);
 
 var _tooltip: TooltipUI;
 var _delay_timer: Timer;
 var _is_hovering: bool = false;
+var _is_nested: bool = false;
 
 var has_ui: bool:
 	get: return self._tooltip != null;
+
+var is_inspecting: bool:
+	get: return self._tooltip != null and self._tooltip.is_inspecting;
 
 ## Set to `true` to automatically hook signals on `_ready`.
 @export var hook_signals_on_ready: bool = true;
@@ -55,6 +63,7 @@ func _ready() -> void:
 			self.queue_free();
 			return;
 	self._delay_timer = Timer.new();
+	self._delay_timer.one_shot = true;
 	self._delay_timer.timeout.connect(self.show_tooltip);
 	self.add_child(self._delay_timer);
 
@@ -91,13 +100,19 @@ func get_data() -> Resource:
 	return parent.get_meta(META_TOOLTIP_DATA);
 
 func instantiate_tooltip() -> void:
-	if self.has_node(NODE_NAME_TOOLTIP):
-		self._tooltip = self.get_node(NODE_NAME_TOOLTIP);
+	var tooltip_path := self._get_tooltip_node_path();
+	
+	if (self.has_node(tooltip_path) if TooltipLayer == null else TooltipLayer.has_node(tooltip_path)):
+		self._tooltip = (self.get_node(tooltip_path)
+			if TooltipLayer == null
+			else TooltipLayer.get_node(tooltip_path)
+		);
 		(self._tooltip.get_node(NODE_NAME_KILL_TIMER) as Timer).stop();
 		
 		var data := self.get_data();
 		
 		self._tooltip.setup(data);
+		self._tooltip.hide();
 		
 		return;
 	
@@ -115,8 +130,9 @@ func instantiate_tooltip() -> void:
 		printerr("General Tooltip prefab doesn't exist: could not create tooltip");
 		push_warning("General Tooltip prefab doesn't exist: could not create tooltip");
 		return;
+	tooltip.associated_node = self;
 	tooltip.top_level = true;
-	tooltip.name = NODE_NAME_TOOLTIP;
+	tooltip.name = self._get_tooltip_node_path();
 	
 	var kill_timer := Timer.new();
 	
@@ -125,13 +141,18 @@ func instantiate_tooltip() -> void:
 	tooltip.add_child(kill_timer);
 	
 	tooltip.setup(data);
+	tooltip.visible = false;
 	
-	self.add_child(tooltip, true);
+	(self.add_child(tooltip, true)
+		if TooltipLayer == null
+		else TooltipLayer.add_child(tooltip, true));
 	self._tooltip = tooltip;
 
 #endregion Public Methods
 
 #region Private Methods
+
+func _get_tooltip_node_path() -> String: return "%s-%d" % [NODE_NAME_TOOLTIP, self.get_instance_id()];
 
 func _hook_to_signal() -> bool:
 	var parent := self.get_parent();
@@ -156,7 +177,7 @@ func _on_entered() -> void:
 		var data := self.get_data();
 		
 		self._tooltip.setup(data);
-	if self._tooltip._is_inspecting:
+	if self._tooltip.is_inspecting:
 		self._tooltip._try_to_enter();
 		return;
 	if self.delay_duration > 0.0:
@@ -170,7 +191,7 @@ func _on_exited() -> void:
 	if self._tooltip == null: return;
 	
 	if self._is_moving_rigid_body(): return;
-	if self._tooltip._is_inspecting:
+	if self._tooltip.is_inspecting:
 		self._tooltip._try_to_exit();
 		return;
 	self._delay_timer.stop();

@@ -12,6 +12,7 @@ var _tooltip_size: Vector2;
 var _is_inspecting: bool = false;
 var _is_trying_to_exit: bool = false;
 var _is_trying_to_free: bool = false;
+var associated_node: TooltipNode = null;
 
 @export var backdrop: ColorRect;
 @export var container: PanelContainer;
@@ -19,7 +20,6 @@ var _is_trying_to_free: bool = false;
 @export var tooltip_description: RichTextLabel;
 
 @export_group("Tooltip Settings")
-@export var delay_time: float = 0.0;
 @export var follow_mouse: bool = true;
 @export var offset: Vector2 = Vector2(24.0, -16.0);
 @export var padding: Vector2 = 32.0 * Vector2.ONE;
@@ -29,13 +29,7 @@ var is_inspecting: bool:
 	get: return self._is_inspecting;
 
 var is_nested_tooltip: bool:
-	get:
-		var parent: Node = self.get_parent();
-		
-		while parent != null:
-			if parent is TooltipUI: return true;
-			parent = parent.get_parent();
-		return false;
+	get: return self.associated_node != null and self.associated_node._is_nested;
 
 signal inspect_tooltip(tooltip: TooltipUI);
 signal stop_inspect_tooltip(tooltip: TooltipUI);
@@ -47,31 +41,38 @@ signal stop_inspect_tooltip(tooltip: TooltipUI);
 func _ready() -> void:
 	self.mouse_filter = Control.MOUSE_FILTER_IGNORE;
 	self.backdrop.visible = false;
+	self.container.reset_size();
+	self._tooltip_size = self.container.get_rect().size;
 	self._position_tooltip();
 
 func _process(delta: float) -> void:
 	if not self._is_inspecting:
-		# self.container.reset_size();
-		# self._tooltip_size = self.container.get_rect().size;
+		self.container.reset_size();
+		self._tooltip_size = self.container.get_rect().size;
 		self._position_tooltip();
 	if self.visible:
-		# self._tooltip_size = self.container.get_rect().size;
+		self._tooltip_size = self.container.get_rect().size;
 		if not self._is_inspecting:
 			if Input.is_action_just_pressed(INPUT_ACTION_TOOLTIP_INSPECT):
 				self._is_inspecting = true;
 				self.mouse_filter = Control.MOUSE_FILTER_STOP;
-				self.backdrop.visible = not self.is_nested_tooltip;
+				if TooltipLayer != null:
+					TooltipLayer.show_backdrop();
+				else:
+					self.backdrop.visible = not self.is_nested_tooltip;
 				self.inspect_tooltip.emit(self);
 		else:
 			if Input.is_action_just_pressed(INPUT_ACTION_TOOLTIP_EXIT):
 				self._is_inspecting = false;
 				self.mouse_filter = Control.MOUSE_FILTER_IGNORE;
+				if TooltipLayer != null:
+					TooltipLayer.hide_backdrop();
 				self.backdrop.visible = false;
 				self.stop_inspect_tooltip.emit(self);
 				if self._is_trying_to_exit or self.is_nested_tooltip:
 					self.hide();
 					self._is_trying_to_exit = false;
-					if self._is_trying_to_free:
+					if self._is_trying_to_free or self.is_nested_tooltip:
 						self.queue_free();
 	
 
@@ -86,7 +87,20 @@ func get_data(_breadcrumbs: Array[String], _index: int) -> Variant:
 	return null;
 
 func show_tooltip() -> void:
+	self.fade_in();
+	self.container.reset_size();
+	self._tooltip_size = self.container.get_rect().size;
+	self._position_tooltip();
 	self.show();
+
+func fade_in() -> void:
+	if fade_in_duration <= 0.0: return;
+	
+	var tween := self.create_tween();
+	var color = self.modulate;
+	
+	self.modulate.a = 0.0;
+	tween.tween_property(self, "modulate", color, fade_in_duration);
 
 func fill_text(text: String) -> String:
 	var regex: RegEx = RegEx.create_from_string("@\\[([a-zA-Z0-9][\\.a-zA-Z0-9]+)\\,\\s*\"([^\"]*)\"\\]");
