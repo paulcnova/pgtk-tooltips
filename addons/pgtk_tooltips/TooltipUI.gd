@@ -14,24 +14,40 @@ var _is_trying_to_exit: bool = false;
 var _is_trying_to_free: bool = false;
 var associated_node: TooltipNode = null;
 
+## The backdrop to be used (if TooltipLayer is disabled as an autoload).
 @export var backdrop: ColorRect;
+
+## The actual container of the tooltip.
 @export var container: PanelContainer;
+
+## The top label of the tooltip, typically the `name` of the resource.
 @export var tooltip_name: Label;
+
+## The text of the tooltip, typically the `description` of the resource.
 @export var tooltip_description: RichTextLabel;
 
 @export_group("Tooltip Settings")
+## Set to `true` to have the tooltip follow the mouse around.
 @export var follow_mouse: bool = true;
+## The offset of the tooltip relative to the mouse/pointer.
 @export var offset: Vector2 = Vector2(24.0, -16.0);
+## The padding of the edges of the screen to ensure a safe distance to pivot the tooltip around.
 @export var padding: Vector2 = 32.0 * Vector2.ONE;
+## The duration in which to fade in the tooltip.
 @export var fade_in_duration: float = 0.15;
 
+## Returns `true` if the tooltip is currently being inspected.
 var is_inspecting: bool:
 	get: return self._is_inspecting;
 
+## Returns `true` if the tooltip is nested within another tooltip.
 var is_nested_tooltip: bool:
 	get: return self.associated_node != null and self.associated_node._is_nested;
 
+## A signal emitted when the player inspects this tooltip.
 signal inspect_tooltip(tooltip: TooltipUI);
+
+## A signal emitted when the player stops inspecting this tooltip.
 signal stop_inspect_tooltip(tooltip: TooltipUI);
 
 #endregion Properties
@@ -80,12 +96,22 @@ func _process(delta: float) -> void:
 
 #region Public Methods
 
+## Sets up the UI by updating the controls with whatever data is found in the resource.
+## [br]
+## - [param data]: The resource used to setup with.[br]
 @abstract func setup(data: Resource) -> void;
 
+## Gets global/external data to be used within the setup, this is part
+## of the [method fill_text] workflow and should be updated to fit
+## individual projects as it's meant to be very granular.
+## [br]
+## - [param _breadcrumbs]: The list of object names (in full) that the text is requesting.[br]
+## - [param _index]: The current index in which the function is viewing the [param _breadcrumbs].[br]
 func get_data(_breadcrumbs: Array[String], _index: int) -> Variant:
 	# TODO: Get data
 	return null;
 
+## Displays the tooltip to the player.
 func show_tooltip() -> void:
 	self.fade_in();
 	self.container.reset_size();
@@ -93,6 +119,7 @@ func show_tooltip() -> void:
 	self._position_tooltip();
 	self.show();
 
+## Fades the tooltip onto the screen.
 func fade_in() -> void:
 	if fade_in_duration <= 0.0: return;
 	
@@ -102,6 +129,20 @@ func fade_in() -> void:
 	self.modulate.a = 0.0;
 	tween.tween_property(self, "modulate", color, fade_in_duration);
 
+## Fills in the text that the dev was searching for. This is meant to dynamically change the data
+## for very contextual reasons. Returns an updated filled-in version of the text.
+## [br][br]
+## For example, if there are two characters at different skill levels; when the
+## player views an item or action, the values should change between characters
+## because of the skill differences. This function is how it's achieved.
+## [br][br]
+## To utilize this function, the text must contain the following format:
+## @[lb]<object.name.like.code>[rb]. For example, @[lb]char.speed[rb] will fill
+## in the character's speed directly. If it needs to revolve around text then the
+## following format can be used: @[lb]<object.name.like.code>, "Text -- $ means the fill data"[rb]
+## For example, @[lb]char.speed, "$ ft"[rb] will fill in as "25 ft" if the character's speed is 25.
+## [br]
+## - [param text]: The text to fill in.
 func fill_text(text: String) -> String:
 	var regex: RegEx = RegEx.create_from_string("@\\[([a-zA-Z0-9][\\.a-zA-Z0-9]+)\\,\\s*\"([^\"]*)\"\\]");
 	var entries: Array[RegExMatch] = regex.search_all(text);

@@ -25,11 +25,11 @@ var _delay_timer: Timer;
 var _is_hovering: bool = false;
 var _is_nested: bool = false;
 
-## Returns `true` if there is an associated [class TooltipUI] that exists.
+## Returns `true` if there is an associated [TooltipUI] that exists.
 var has_ui: bool:
 	get: return self._tooltip != null;
 
-## Returns `true` if the current [class TooltipUI] is being inspected.
+## Returns `true` if the current [TooltipUI] is being inspected.
 var is_inspecting: bool:
 	get: return self._tooltip != null and self._tooltip.is_inspecting;
 
