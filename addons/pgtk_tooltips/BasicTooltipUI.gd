@@ -6,6 +6,6 @@ extends TooltipUI
 
 func setup(data: Resource) -> void:
 	self.tooltip_name.text = self.fill_text(data.get("name"));
-	self.tooltip_description.text = self.fill_text(data.get("desc"));
+	self.tooltip_description.text = self.fill_text(data.get("description"));
 
 #endregion Public Methods
