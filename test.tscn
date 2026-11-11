@@ -6,12 +6,10 @@
 [sub_resource type="Resource" id="Resource_6uqi0"]
 script = ExtResource("1_8uh7m")
 name = "qbudabi"
-desc = "gffda  fsfsfs sfd"
 
 [sub_resource type="Resource" id="Resource_8uh7m"]
 script = ExtResource("1_8uh7m")
 name = "uwu"
-desc = "Hello [url=res://test.resource.tres]World![/url]"
 
 [node name="Control" type="Control" unique_id=1751925491]
 layout_mode = 3
@@ -37,7 +35,7 @@ offset_left = 125.0
 offset_top = 215.0
 offset_right = 206.0
 offset_bottom = 246.0
-text = "ABADSDF"
+text = "ABADSDFnjk I'm"
 
 [node name="Button3" type="Button" parent="." unique_id=1169144613]
 layout_mode = 0
